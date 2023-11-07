@@ -34,7 +34,7 @@ def _is_dataclass(obj: Instance) -> bool:
 
 def _dataclass_to_typeddict(instance: Instance, api: TypeAnalyser | TypeChecker) -> TypedDictType:
     items: dict[str, Type] = {}
-    for cls in instance.type.mro:
+    for cls in reversed(instance.type.mro):
         if _DATACLASS_TAG not in cls.metadata:
             continue
         for name, sym in cls.names.items():
