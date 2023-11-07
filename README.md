@@ -50,20 +50,20 @@ class Base:
 
 
 @dataclass
-class IntWraper:
+class IntWrapper:
     value: int
 
 
 @dataclass
 class Data(Base):
-    version: IntWraper
+    version: IntWrapper
     command: str
 
     def as_typed_dict(self) -> AsTypedDict[Self]:
         return as_typed_dict(self)
 
 
-data = Data(version=IntWraper(1), command="c", base=False)
+data = Data(version=IntWrapper(1), command="c", base=False)
 
 # 🎉 Type-safe conversion!
 td = as_typed_dict(data)

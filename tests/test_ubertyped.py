@@ -6,7 +6,7 @@ import pytest
 
 from ubertyped import AsTypedDict, DataclassInstance, as_typed_dict
 
-from .conftest import Data, DataAsTypedDict, IntWraper
+from .conftest import Data, DataAsTypedDict, IntWrapper
 
 
 def test_as_typed_dict_runtime_behavior(data: Data) -> None:
@@ -33,7 +33,7 @@ def test_type(data_typed_dict: DataAsTypedDict) -> None:
     reveal_type(
         _y  # N: Revealed type is "TypedDict({'version': TypedDict({'value': builtins.int}), 'command': builtins.str, 'base': builtins.bool})"
     )
-    _z: AsTypedDict[IntWraper] = data_typed_dict["version"]
+    _z: AsTypedDict[IntWrapper] = data_typed_dict["version"]
     reveal_type(_z)  # N: Revealed type is "TypedDict({'value': builtins.int})"
 
 

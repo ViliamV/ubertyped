@@ -12,13 +12,13 @@ class Base:
 
 
 @dataclass
-class IntWraper:
+class IntWrapper:
     value: int
 
 
 @dataclass
 class Data(Base):
-    version: IntWraper
+    version: IntWrapper
     command: str
 
     def as_typed_dict(self) -> ubertyped.AsTypedDict[Self]:
@@ -27,7 +27,7 @@ class Data(Base):
 
 @pytest.fixture
 def data() -> Data:
-    return Data(version=IntWraper(1), command="c", base=False)
+    return Data(version=IntWrapper(1), command="c", base=False)
 
 
 @pytest.fixture

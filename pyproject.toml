@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ubertyped"
-version = "0.1.0"
+version = "0.1.1"
 description = "Convert dataclass to TypedDict for fun and type safety 🪄"
 authors = ["Viliam Valent <hello@valent.email>"]
 license = "MIT"
