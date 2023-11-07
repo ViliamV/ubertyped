@@ -1,9 +1,9 @@
 from collections.abc import Callable
-from typing import Final, cast
+from typing import Final, TypeGuard, cast
 
 from mypy.checker import TypeChecker
 from mypy.errorcodes import TYPE_ARG
-from mypy.nodes import TypeInfo, Var
+from mypy.nodes import Context, TypeInfo, Var
 from mypy.plugin import (
     AnalyzeTypeContext,
     FunctionContext,
@@ -63,74 +63,67 @@ def _default_type_analysis(api: TypeAnalyser, type_: UnboundType) -> Type:
     return AnyType(TypeOfAny.special_form)
 
 
-def _analyze_type(ctx: AnalyzeTypeContext) -> Type:
-    api = cast(TypeAnalyser, ctx.api)
-    type_name = ctx.type.name
-    if (args_len := len(ctx.type.args)) != 1:
+def _is_type_to_analyze(obj: Type, /) -> TypeGuard[Instance]:
+    return isinstance(obj, Instance) and obj.type.fullname == _TYPE_TO_ANALYZE
+
+
+def _try_conversion(obj: Instance, api: TypeChecker | TypeAnalyser, context: Context) -> Type:
+    type_name = obj.type.name
+    if (args_len := len(obj.args)) != 1:
         api.fail(
             f'"{type_name}" expects 1 type argument, but {args_len} given',
-            ctx.context,
+            context,
             code=TYPE_ARG,
         )
         return UninhabitedType()
-    argument = ctx.type.args[0]
-    analyzed = api.analyze_type(argument)
-    if isinstance(analyzed, TypeAliasType) and (expanded := analyzed.expand_all_if_possible()) is not None:
-        analyzed = expanded
-    if isinstance(analyzed, TypeVarType):
-        upper_bound = analyzed.upper_bound
-        if isinstance(upper_bound, Instance) and _is_dataclass(upper_bound):
-            return _dataclass_to_typeddict(upper_bound, api)
-        return _default_type_analysis(api, ctx.type)
-    if not isinstance(analyzed, Instance):
-        api.fail(
-            f'Argument 1 to "{type_name}" has incompatible type "{analyzed}"',
-            ctx.context,
-        )
-        return UninhabitedType()
-    if not _is_dataclass(analyzed):
-        api.fail(
-            f'Argument 1 to "{type_name}" is not dataclass',
-            ctx.context,
-        )
-        return UninhabitedType()
-    return _dataclass_to_typeddict(analyzed, api)
-
-
-def _analyze_return_type(ctx: FunctionContext | MethodContext) -> Type:
-    api = cast(TypeChecker, ctx.api)
-    return_type = ctx.default_return_type
-    if not isinstance(return_type, Instance) or return_type.type.fullname != _TYPE_TO_ANALYZE:
-        return return_type
-    type_name = return_type.type.name
-    if (args_len := len(return_type.args)) != 1:
-        api.fail(
-            f'"{type_name}" expects 1 type argument, but {args_len} given',
-            ctx.context,
-            code=TYPE_ARG,
-        )
-        return UninhabitedType()
-    argument = return_type.args[0]
+    argument = obj.args[0]
     if isinstance(argument, TypeAliasType) and (expanded := argument.expand_all_if_possible()) is not None:
         argument = expanded
     if isinstance(argument, TypeVarType):
         upper_bound = argument.upper_bound
         if isinstance(upper_bound, Instance) and _is_dataclass(upper_bound):
             return _dataclass_to_typeddict(upper_bound, api)
-        return return_type
+        return obj
     if not isinstance(argument, Instance):
         api.fail(
             f'Argument 1 to "{type_name}" has incompatible type "{argument}"',
-            ctx.context,
+            context,
         )
         return UninhabitedType()
     if not _is_dataclass(argument):
         api.fail(
             f'Argument 1 to "{type_name}" is not dataclass',
-            ctx.context,
+            context,
         )
         return UninhabitedType()
     return _dataclass_to_typeddict(argument, api)
+
+
+def _analyze_type(ctx: AnalyzeTypeContext) -> Type:
+    api = cast(TypeAnalyser, ctx.api)
+    default = _default_type_analysis(api, ctx.type)
+    if _is_type_to_analyze(default):
+        return _try_conversion(default, api, ctx.context)
+    return default
+
+
+def _analyze_return_type(ctx: FunctionContext | MethodContext) -> Type:
+    api = cast(TypeChecker, ctx.api)
+    return_type = ctx.default_return_type
+    if not isinstance(return_type, Instance):
+        return return_type
+    if _is_type_to_analyze(return_type):
+        return _try_conversion(return_type, api, ctx.context)
+    elif any(_is_type_to_analyze(arg) for arg in return_type.args):
+        new_args: list[Type] = []
+        for arg in return_type.args:
+            if _is_type_to_analyze(arg):
+                new_args.append(_try_conversion(arg, api, ctx.context))
+            else:
+                new_args.append(arg)
+        return return_type.copy_modified(args=new_args)
+    else:
+        return return_type
 
 
 class DataclassAsTypedDictPlugin(Plugin):
