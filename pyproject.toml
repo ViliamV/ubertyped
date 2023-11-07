@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "ubertyped"
-version = "0.0.1"
-description = ""
+version = "0.0.2"
+description = "Convert dataclass to TypedDict for fun and (type) safety 🪄"
 authors = ["Viliam Valent <hello@valent.email>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ViliamV/ubertyped"
 homepage = "https://github.com/ViliamV/ubertyped"
-packages = [{include = "ubertyped"}]
+packages = [{ include = "ubertyped" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -45,24 +45,24 @@ typeCheckingMode = "strict"
 
 [tool.ruff]
 select = [
-  "A",   # flake8-builtins
-  "ARG", # flake8-unused-arguments
-  "B",   # flake8-bugbear
-  "C4",  # flake8-comprehensions
-  "C90", # mccabe
-  "E",   # pycodestyle
-  "F",   # Pyflakes
-  "N",   # pep8-naming
-  "NPY", # NumPy
-  "PD",  # pandas-vet
-  "PIE", # flake8-pie
-  "PLE", # Pylint Error
-  "PTH", # flake8-use-pathlib
-  "RUF", # Ruff
-  "S",   # flake8-bandit
-  "SIM", # flakes8-simplify
-  "T20", # flake8-print
-  "UP",  # pyupgrade
+  "A",    # flake8-builtins
+  "ARG",  # flake8-unused-arguments
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
+  "C90",  # mccabe
+  "E",    # pycodestyle
+  "F",    # Pyflakes
+  "N",    # pep8-naming
+  "NPY",  # NumPy
+  "PD",   # pandas-vet
+  "PIE",  # flake8-pie
+  "PLE",  # Pylint Error
+  "PTH",  # flake8-use-pathlib
+  "RUF",  # Ruff
+  "S",    # flake8-bandit
+  "SIM",  # flakes8-simplify
+  "T20",  # flake8-print
+  "UP",   # pyupgrade
   "I001", # isort
 ]
 cache-dir = ".cache/ruff"
