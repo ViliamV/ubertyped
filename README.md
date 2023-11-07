@@ -1,6 +1,6 @@
 # Übertyped
 
-Convert `dataclass` to `TypedDict` for fun and (type) safety 🪄
+Convert `dataclass` to `TypedDict` for fun and type safety 🪄
 
 > **uber-** _/ˈuːbə/_ to a great or extreme degree
 
