@@ -68,7 +68,7 @@ data = Data(version=IntWrapper(1), command="c", base=False)
 # 🎉 Type-safe conversion!
 td = as_typed_dict(data)
 reveal_type(td)
-# Revealed type is "TypedDict({'version': TypedDict({'value': builtins.int}), 'command': builtins.str, 'base': builtins.bool})"
+# Revealed type is "TypedDict({'base': builtins.bool, 'version': TypedDict({'value': builtins.int}), 'command': builtins.str})"
 
 # 🎉 Works with nested dataclasses too!
 reveal_type(td["version"]["value"])
@@ -77,9 +77,9 @@ reveal_type(td["version"]["value"])
 
 # 🎉 Binding `Self` in methods is resolved correctly!
 reveal_type(data.as_typed_dict)
-# Revealed type is "def () -> TypedDict({'version': TypedDict({'value': builtins.int}), 'command': builtins.str, 'base': builtins.bool})"
+# Revealed type is "def () -> TypedDict({'base': builtins.bool, 'version': TypedDict({'value': builtins.int}), 'command': builtins.str})"
 
-# 🎉 In runtime, `as_typed_dict` is just a wrapper around `asdict`!
+# 🎉 At runtime, `as_typed_dict` is just a wrapper around `dataclasses.asdict`!
 if asdict(data) == data.as_typed_dict():
     print("✅")
 else:
